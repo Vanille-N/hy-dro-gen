@@ -12,7 +12,7 @@
 
 
 ```typ
-#import "@preview/hy-dro-gen:0.1.5" as hy
+#import "@preview/hy-dro-gen:0.1.0" as hy
 ```
 #table(
   columns: (66%, 35%),

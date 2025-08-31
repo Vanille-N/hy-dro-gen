@@ -6,8 +6,8 @@
 /// #link("https://github.com/typst/hypher/blob/main/src/lang.rs")[`github:typst/hypher`]
 ///
 /// If this function returns `true`,
-/// then an invocation of `hyphen-points` with this language
-/// is guaranteed to not raise a "Language does not exist" failure.
+/// then an invocation of `syllables` with this language
+/// is guaranteed to not raise a "Invalid language" failure.
 ///
 /// -> bool
 #let exists(
@@ -25,6 +25,13 @@
 /// ```typ
 /// (en: "English", fr: "French", ...)
 /// ```
+///
+/// This dictionary is expected but not guaranteed to be in sync with
+/// `exists`, because they are fetched through different means.
+/// (`exists` queries the actual WASM module, while `languages` is generated
+/// automatically from the source code of `hypher`). If they are out of sync,
+/// `exists` is the authority for which languages are actually supported
+/// by `syllables`.
 /// -> dictionary
 #let languages = {
   let langs = (:)
