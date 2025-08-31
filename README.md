@@ -2,12 +2,18 @@
 
 Unofficial bindings from [`typst/hypher`](https://github.com/typst/hypher) to native Typst.
 
-Documentation [here](https://github.com/Vanille-N/hy-dro-gen/blob/master/doc.pdf).
+Full documentation [here](https://github.com/Vanille-N/hy-dro-gen/blob/master/doc.pdf).
+
+## Versions
+
+| `hy-dro-gen` | `hypher` |
+|--------------|----------|
+| 0.1.0        | 0.1.5    |
 
 ## Basic usage
 
 ```typ
-#import "@preview/hy-dro-gen:0.1.5" as hy
+#import "@preview/hy-dro-gen:0.1.0" as hy
 
 // `exists` checks if a language is supported
 #assert(hy.exists("fr"))
