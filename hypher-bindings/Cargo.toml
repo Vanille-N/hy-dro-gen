@@ -1,0 +1,15 @@
+[package]
+name = "hypher-bindings"
+version = "0.1.5"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Main dependency
+hypher = "0.1.5"
+
+# Auxiliary dependencies
+wasm-minimal-protocol = "0.1.0"
+
