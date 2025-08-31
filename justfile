@@ -3,5 +3,5 @@ test:
   rm test.pdf
 
 doc:
-  typst watch doc.typ
+  typst watch --root=. docs/main.typ docs/main.pdf
 

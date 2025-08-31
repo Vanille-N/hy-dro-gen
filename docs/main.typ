@@ -8,14 +8,14 @@
 ]
 
 
-#import "lib.typ" as hy
+#import "/lib.typ" as hy
 
 
 ```typ
 #import "@preview/hy-dro-gen:0.1.5" as hy
 ```
 #table(
-  columns: (70%, 30%),
+  columns: (66%, 35%),
   stroke: gray + 0.5pt,
   [```typ #hy.exists("en")```],
     [#hy.exists("en")],
@@ -27,6 +27,8 @@
     [#hy.syllables("hydrogène")],
   [```typ #hy.syllables("hydrogène", lang: "fr")```],
     [#hy.syllables("hydrogène", lang: "fr")],
+  [```typ #hy.syllables("υδρογόνο", lang: "el")```],
+    [#hy.syllables("υδρογόνο", lang: "el")],
   [```typ #hy.syllables("hydrogène", lang: "xz")```],
     [#text(fill: red)[*panic: Invalid language*]],
   [```typ #hy.syllables("hydrogène", lang: "xz", fallback: auto)```],
@@ -60,6 +62,7 @@ The above mapping is available via the static dictionary ```typ #hy.languages```
 #import "@preview/tidy:0.4.3"
 
 #let parse-and-show(path, header) = {
+  let path = "/" + path
   header
   import path as mod
   let docs = tidy.parse-module(

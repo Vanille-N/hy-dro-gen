@@ -6,8 +6,7 @@ rm -rf release/*
 cp lib.typ release/
 cp typst.toml release/
 cp README.md release/
+cp LICENSE release/
 
-cp languages.txt release/
-mkdir release/hypher-bindings
-cp hypher-bindings/hypher.wasm release/hypher-bindings/
+cp -r assets release/
 

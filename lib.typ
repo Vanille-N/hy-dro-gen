@@ -1,4 +1,4 @@
-#import plugin("/hypher-bindings/hypher.wasm") as hypher
+#import plugin("/assets/hypher.wasm") as hypher
 
 /// Check if a code corresponds to a language that has registered patterns.
 ///
@@ -28,7 +28,7 @@
 /// -> dictionary
 #let languages = {
   let langs = (:)
-  for line in read("languages.txt").split("\n") {
+  for line in read("/assets/languages.txt").split("\n") {
     if line != "" {
       langs.insert(..line.split(" "))
     }
