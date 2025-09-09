@@ -8,7 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # Main dependency
-hypher = "0.1.5"
+hypher = "0.1.6"
 
 # Auxiliary dependencies
 wasm-minimal-protocol = "0.1.0"
