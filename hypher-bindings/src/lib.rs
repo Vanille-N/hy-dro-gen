@@ -26,5 +26,5 @@ pub fn exists(lang: &[u8]) -> Result<Vec<u8>, String> {
 pub fn syllables(word: &[u8], lang: &[u8]) -> Result<Vec<u8>, String> {
     let lang = iso_lang(lang)??;
     let word = assume_utf8(word)?;
-    Ok(hypher::hyphenate(word, lang).join("-").as_bytes().to_vec())
+    Ok(hypher::hyphenate(word, lang).join("\0").as_bytes().to_vec())
 }

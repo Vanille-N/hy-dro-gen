@@ -72,6 +72,6 @@
     bytes(word),
     bytes(lang),
   )
-  str(hyphenated).split("-")
+  str(hyphenated).split("\u{0}")
 }
 
