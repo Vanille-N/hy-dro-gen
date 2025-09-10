@@ -2,19 +2,23 @@
 
 Unofficial bindings from [`typst/hypher`](https://github.com/typst/hypher) to native Typst.
 
+<!-- @scrybe(if publish; grep https; grep {{version}}) -->
 Full documentation [here](docs/main.pdf).
 
 ## Versions
 
-| `hy-dro-gen` | `hypher` |
-|--------------|----------|
-| 0.1.0        | 0.1.5    |
-| 0.1.1        | 0.1.6    |
+<!-- @scrybe(jump latest; grep {{version}}) -->
+| `hy-dro-gen`   | `hypher`                                                        |
+|----------------|-----------------------------------------------------------------|
+| 0.1.0          | [0.1.5](https://github.com/typst/hypher/releases/tag/v0.1.5)    |
+| 0.1.1 (latest) | [0.1.6](https://github.com/typst/hypher/releases/tag/v0.1.6)    |
 
 ## Basic usage
 
+<!-- @scrybe(not publish; jump import; grep local; grep {{version}}) -->
+<!-- @scrybe(if publish; jump import; grep preview; grep {{version}}) -->
 ```typ
-#import "@preview/hy-dro-gen:0.1.1" as hy
+#import "@local/hy-dro-gen:0.1.1" as hy
 
 // `exists` checks if a language is supported
 #assert(hy.exists("fr"))
