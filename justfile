@@ -1,9 +1,9 @@
-test:
-  typst compile test.typ
-  rm test.pdf
+typstc cmd file fmt="pdf":
+  typst {{ cmd }} --root=. --font-path=. {{ file }} {{ replace(file, ".typ", "." + fmt) }}
 
-doc:
-  typst watch --root=. --font-path=docs/fonts docs/docs.typ docs/docs.pdf
+doc: (typstc "watch" "docs/docs.typ")
+
+test T: (typstc "watch" "tests/"+T+"/test.typ")
 
 scrybe:
   scrybe README.md typst.toml docs/docs.typ --version=0.1.2

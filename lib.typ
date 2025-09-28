@@ -64,6 +64,9 @@
 ) = {
   _dyn-languages.update(langs => {
     for (iso, trie) in args.named() {
+      if type(trie) != bytes {
+        panic("load-patterns expects bytes, received " + str(type(trie)))
+      }
       langs.insert(iso, trie)
     }
     langs
