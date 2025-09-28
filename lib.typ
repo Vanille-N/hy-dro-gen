@@ -5,18 +5,18 @@
 /// See the list of officially supported languages at
 /// #link("https://github.com/typst/hypher/blob/main/src/lang.rs")[`github:typst/hypher`]
 ///
-/// If this function returns `true`,
-/// then an invocation of `syllables` with this language
-/// is guaranteed to not raise a "Invalid language" failure.
+/// If this function returns #typ.v.true,
+/// then an invocation of @cmd:hy:syllables with this language
+/// is guaranteed to not raise an "Invalid language" failure.
 ///
 /// -> bool
 #let exists(
-  /// 2-letter language code.
-  /// -> str
-  lang,
+  /// 2-letter @iso code, e.g ```typc "en"```, ```typc "fr"```, ```typc "el"```, etc.
+  /// -> iso
+  iso,
 ) = {
   let exists = hypher.exists(
-    bytes(lang),
+    bytes(iso),
   )
   exists.at(0) != 0
 }
@@ -43,29 +43,67 @@
   langs
 }
 
-/// Splits a word into syllables according to hyphenation patterns.
-///
+
+#let _dyn-languages = state("dyn-languages", (:))
+
+/// Load new precompiled patterns.
+/// If your patterns are not compiled yet, see @install-hypher and @compile-pats.
+/// #property(since: version(0, 1, 2))
+/// -> content
+#let load-patterns(
+  /// One or more pairs in the format `{iso}: {bytes}`,
+  /// for example one could write:
+  /// #codesnippet[```typ
+  /// #load-patterns(
+  ///   en: read("tries/en.bin", encoding: none),
+  ///   fr: read("tries/fr.bin", encoding: none),
+  /// )
+  /// ```]
+  /// -> dictionary
+  ..args
+) = {
+  _dyn-languages.update(langs => {
+    for (iso, trie) in args.named() {
+      langs.insert(iso, trie)
+    }
+    langs
+  })
+}
+
+/// Splits a word into syllables according to available hyphenation patterns.
 /// -> (..string,)
 #let syllables(
   /// Word to split.
   /// -> string
   word,
-  /// Language 2-letter code.
-  /// -> str
+  /// Either an @iso code, or bytes representing a trie.
+  /// -> iso | bytes
   lang: "en",
   /// Determines the behavior in case `lang` is unsupported
-  /// - `none`: panics with "Invalid language"
-  /// - `auto`: the word is not split at all
-  /// - valid 2-letter code: use that instead
-  /// -> str | auto | none
+  /// - #typ.v.none: panics with "Invalid language"
+  /// - #typ.v.auto: the word is not split at all
+  /// - @type:iso: use that instead
+  /// -> none | auto | iso
   fallback: none,
+  /// Look also in the dynamically loaded languages,
+  /// i.e. valid values for #arg[lang] now include not just the builtin ones
+  /// but also those declared via @cmd:hy:load-patterns.
+  /// Setting this to true will also make the function contextual,
+  /// #property(since: version(0, 1, 2))
+  /// #property(requires-context: true)
+  /// -> bool
+  dyn: false
 ) = {
-  if fallback != none and not exists(lang) {
-    if fallback == auto {
-      return (word,)
-    } else {
-      assert(exists(fallback))
-      lang = fallback
+  if type(lang) == str {
+    if dyn and lang in _dyn-languages.get() {
+      lang = _dyn-languages.get().at(lang)
+    } else if fallback != none and not exists(lang) {
+      if fallback == auto {
+        return (word,)
+      } else {
+        assert(exists(fallback))
+        lang = fallback
+      }
     }
   }
   let hyphenated = hypher.syllables(
@@ -73,5 +111,26 @@
     bytes(lang),
   )
   str(hyphenated).split("\u{0}")
+}
+
+/// Apply show rules to hyphenate the specified language.
+/// The output is a #lambda(content, ret:content) that can be
+/// used as ```typ #show``` rule for the rest of the document.
+/// #property(since: version(0, 1, 2))
+/// -> function
+#let apply-patterns(
+  /// @iso code of a language previously added by @cmd:hy:load-patterns.
+  /// -> iso
+  iso
+) = cc => context {
+  let trie = _dyn-languages.get().at(iso)
+  show regex("\w+"): ww => context {
+    if text.lang == iso {
+      syllables(ww.text, lang: trie).join([-?])
+    } else {
+      ww
+    }
+  }
+  cc
 }
 

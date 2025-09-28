@@ -1,7 +1,7 @@
 [package]
 name = "hy-dro-gen"
 # @scrybe(grep {{version}})
-version = "0.1.1"
+version = "0.1.2"
 entrypoint = "lib.typ"
 
 authors = ["Neven Villani <neven@crans.org>"]
