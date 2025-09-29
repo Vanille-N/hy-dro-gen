@@ -8,7 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # Main dependency
-hypher = { path = "../../../hypher", features = ["dyn"] }
+hypher = { path = "../../../hypher", features = ["dyn", "build"] }
 
 # Auxiliary dependencies
 wasm-minimal-protocol = "0.1.0"

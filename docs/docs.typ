@@ -72,7 +72,7 @@
     *Versions*
     - #link(repo)[`dev`]
     - #link(repo + "releases/tag/0.1.2")[`hy-dro-gen:0.1.2`]
-      (#link("https://typst.app/universe/package/meander")[`latest`])
+      (#link("https://typst.app/universe/package/hy-dro-gen")[`latest`])
       $->$
       #link(hypher-repo + "releases/tags/0.1.6")[`hypher:0.1.6`]
       forked to #link("https://github.com/Vanille-N/hypher/commit/606d41596225effd0732a99db50f6eef8bf50077")[`606d415`]

@@ -18,7 +18,7 @@
 #table(columns: (5cm, 5cm))[
   #sample
 ][
-  #hy.load-patterns(gl: read("gl.bin", encoding: none))
+  #hy.load-patterns(gl: (bin: read("gl.bin", encoding: none), bounds: (2, 2)))
   #show: hy.apply-patterns("gl")
   #sample
 ]
