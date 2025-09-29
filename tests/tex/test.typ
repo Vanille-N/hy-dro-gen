@@ -18,7 +18,8 @@
 #table(columns: (5cm, 5cm))[
   #sample
 ][
-  #hy.load-patterns(gl: (tex: read("hyph-gl.tex"), bounds: (2, 2)))
+  #let trie_gl = hy.trie(tex: read("hyph-gl.tex"), bounds: (2, 2))
+  #hy.load-patterns(gl: trie_gl)
   #show: hy.apply-patterns("gl")
   #sample
 ]

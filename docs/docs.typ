@@ -6,6 +6,7 @@
 
 #let repo = "https://github.com/Vanille-N/hy-dro-gen/"
 #let hypher-repo = "https://github.com/typst/hypher/"
+#let hypher-fork-repo = "https://github.com/Vanille-N/hypher/"
 #let typst-repo = "https://github.com/typst/typst/"
 
 #let iso = link("https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")[ISO 639-1]
@@ -51,7 +52,9 @@
 
   abstract: [
     HY-DRO-GEN can split words into syllables in any supported language,
-    which enables correct hyphenation.
+    which enables correct hyphenation. It includes the ability to dynamically
+    load hyphenation patterns, enabling hyphenation also for languages or variants
+    not natively supported by Typst.
 
     HY-DRO-GEN is composed of
     1. an internal WASM module that provides bindings to the hyphenation library
@@ -75,7 +78,7 @@
       (#link("https://typst.app/universe/package/hy-dro-gen")[`latest`])
       $->$
       #link(hypher-repo + "releases/tags/0.1.6")[`hypher:0.1.6`]
-      forked to #link("https://github.com/Vanille-N/hypher/commit/606d41596225effd0732a99db50f6eef8bf50077")[`606d415`]
+      forked to #link(hypher-fork-repo + "commit/83aa0d2d562e268caac7a7ad5b3e71530784dcbc")[`83aa0d2`]
     - #link(repo + "releases/tag/0.1.1")[`hy-dro-gen:0.1.1`]
       #hide[(`latest`)]
       $->$ #link(hypher-repo + "releases/tags/0.1.6")[`hypher:0.1.6`]
@@ -96,6 +99,7 @@
 )
 
 #custom-type("iso")
+#custom-type("trie")
 
 = Quick start
 
@@ -194,7 +198,7 @@ Alternatively, you can provide a fallback strategy among:
 = Dynamically loaded languages
 
 #warning-alert[
-  This feature is experimental and lacks validation.
+  This feature is experimental and still lacks some validation.
   If you do not follow the instructions below you can end up with
   incomprehensible error messages.
 ]
@@ -208,7 +212,15 @@ embeds the automata for 35 (possibly soon #link(hypher-repo + "pull/27")[36])
 languages, but until #link(typst-repo + "issues/5223")[issue \#5223] lands,
 it is not currently possible to load custom patterns.
 
+The ability to dynamically load patterns is however implemented
+by my own #link(hypher-fork-repo)[fork of hypher],
+and HY-DRO-GEN makes use of this capability.
+
 == Obtaining tries
+
+Tries are loaded from #TeX pattern files or precompiled binaries by @cmd:hy:trie.
+This section details how to obtain an object of type @type:trie that you
+can then pass to @cmd:hy:syllables.
 
 === Download pattern files
 
@@ -219,9 +231,30 @@ of which quite a few are not available natively in Typst.
 In what follows I assume that you have downloaded your pattern files,
 and saved them to `patterns/hyph-${iso}.tex`, replacing `${iso}` with
 whatever code the language you want to use has.
-Create also a directory `tries/`.
+Also note on #link("https://www.hyphenation.org/")[hyphenation.org]
+the column titled '(left,right)-hyphenmin'. This data will be important.
 
-=== Install `hypher` <install-hypher>
+=== On-the-fly compilation <on-the-fly>
+
+One way to obtain a trie is:
+#codesnippet[```typ
+#let trie = hy.trie(
+  tex: read("patterns/hyph-${iso}.tex"),
+  bounds: hyphenmin,
+)
+```]
+For example to load Galician (```typc "gl"``` patterns):
+#codesnippet[```typ
+#let trie_gl = hy.trie(tex: read("patterns/hyph-gl.tex"), bounds: (2, 2))
+```]
+
+This solution incurs a small one-time overhead to compile the trie from the patterns.
+You can avoid this overhead by following the instructions in @precompiled
+and building a @type:trie from a precompiled binary instead.
+
+=== Precompilation <precompiled>
+
+==== Install `hypher` <install-hypher>
 
 #warning-alert[
   This step is still very rough.
@@ -232,7 +265,7 @@ Create also a directory `tries/`.
 The `.tex` pattern files need to be compiled to automata readable by
 #link(hypher-repo)[hypher].
 First we need to install #link(hypher-repo)[hypher] locally as a binary.
-Currently the only way I know of doing so is:
+Currently the simplest way of doing so is:
 #codesnippet[```sh
 # Download the fork of hypher that can compile tries
 $ cd /tmp && git clone https://github.com/Vanille-N/hypher.git
@@ -247,35 +280,63 @@ I hope that soon this process can be simplified to:
 $ cargo install hypher --features bin
 ```]
 
-=== Compile the trie <compile-pats>
+==== Compile and load the trie <compile-pats>
 
 With `hypher` now installed, run
 #codesnippet[```sh
+$ mkdir -p tries
 $ hypher build patterns/hyph-${iso}.tex tries/${iso}.bin
 ```]
 
+The resulting file is a valid input for @cmd:hy:trie in the following form:
+#codesnippet[```typ
+#let trie = hy.trie(
+  bin: read("tries/${iso}.bin", encoding: none),
+  bounds: hyphenmin,
+)
+```]
+For example to load Galician (```typc "gl"``` patterns), the entire process is:
+#codesnippet[```sh
+$ hypher build patterns/hyph-gl.tex tries/gl.bin
+```]
+#codesnippet[```typ
+#let trie_gl = hy.trie(
+  bin: read("tries/gl.bin", encoding: none),
+  bounds: (2, 2),
+)
+```]
+
+
 == Loading patterns
 
-@cmd:hy:syllables can take as #arg[lang] an automata as bytes.
+Once you have obtained an object of type @type:trie through either
+@on-the-fly or @precompiled, you can use it as a #arg[lang] for @cmd:hy:syllables.
 #table(
   columns: (68%, 35%),
   stroke: gray + 0.5pt,
   codesnippet[```typ
-  #hy.syllables(
-    "galego",
-    lang: read("tries/gl.bin", encoding: none),
-  )```],
-  [#hy.syllables("galego", lang: read("tries/gl.bin", encoding: none))],
+  #let trie_gl = hy.trie(
+    tex: read("patterns/hyph-gl.tex"),
+    bounds: (2, 2),
+  )
+  #hy.syllables("galego", lang: trie_gl)```],
+  [
+    #let trie_gl = hy.trie(tex: read("patterns/hyph-gl.tex"), bounds: (2, 2))
+    #hy.syllables("galego", lang: trie_gl)
+  ]
 )
 
 === Manual <load-manual>
 
 If you want to hyphenate a specific piece of text with a pattern,
-you can write for example:
+you could write for example:
 #codesnippet[```typ
-#let trie = read("tries/gl.bin", encoding: none)
-#show regex(\w+): word => {
-  syllables(word.text, lang: trie).join([-?])
+#let trie_gl = hy.trie(
+  bin: read("tries/gl.bin", encoding: none),
+  bounds: (2, 2),
+)
+#show regex("\w+"): word => {
+  syllables(word.text, lang: trie_gl).join([-?])
 }
 #text(lang: "gl")[#my-text]
 ```]
@@ -285,10 +346,13 @@ you can write for example:
 Altertatively, you can use @cmd:hy:load-patterns and @cmd:hy:apply-patterns.
 Behind the scenes they will perform almost the same manipulation as in @load-manual.
 #codesnippet[```typ
+#let trie_gl = hy.trie(
+  bin: read("tries/gl.bin", encoding: none),
+  bounds: (2, 2),
+)
 #hy.load-patterns(
-  gl: read("tries/gl.bin", encoding: none),
-  // accepts multiple pairs in the format
-  // {iso}: read("tries/{iso}.bin", encoding: none),
+  gl: trie_gl,
+  // accepts multiple pairs in the format 'iso: trie'
 )
 #show: hy.apply-patterns("gl")
 #text(lang: "gl")[#my-text]
